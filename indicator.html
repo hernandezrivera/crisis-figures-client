@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel='icon' href='chart-icon.png' type='image/x-icon'/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+
+
+  <title>ReliefWeb Crisis Figures - Indicator page</title>
+
+  <link href="https://fonts.googleapis.com√/css?family=Dosis:400,700" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <script type="text/javascript" src='scripts.js'> </script>
+
+<script>
+
+    function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    console.log(vars);
+    return vars;
+}
+
+var id = getUrlVars()["id"];
+console.log(id);
+
+</script>
+
+</head>
+
+<body>
+
+  <div id="root">
+
+    <canvas id="myChart"></canvas>
+
+
+  </div>
+
+  <script>var items = read_and_parse_values('https://api-cri-figs.tierx.dev/values?indicator.id=' + id );
+
+
+  </script>
+
+
+</body>
+
+</html>
