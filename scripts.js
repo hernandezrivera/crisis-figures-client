@@ -16,13 +16,7 @@ function read_and_parse(url, base_link, id_attribute) {
 
         // Begin accessing JSON data here
         var data = JSON.parse(this.response);
-
-        console.log(data);
-        console.log(data['hydra:totalItems']);
-
         var items = data['hydra:member'];
-
-        console.log(items);
 
         if (request.status >= 200 && request.status < 400) {
             items.forEach(item => {
@@ -30,7 +24,9 @@ function read_and_parse(url, base_link, id_attribute) {
                 card.setAttribute('class', 'card');
 
                 const p = document.createElement('p');
-                p.textContent = item.name;
+                console.log(item.label);
+                if ( item.label === undefined ) p.textContent = item.name;
+                else p.textContent = item.label;
                 p.setAttribute('class', 'title');
 
                 container.appendChild(card);
@@ -41,12 +37,13 @@ function read_and_parse(url, base_link, id_attribute) {
 
                 a.appendChild(p);
 
+                span = document.createElement('span');
                 Object.keys(item)
                     .forEach(function eachKey(key) {
-                        span = document.createElement('span');
-                        span.textContent = key + ': ' + item[key];
-                        card.appendChild(span);
+                        span.textContent = span.textContent + ' / ' + key + ': ' + item[key];
                     });
+                span.classList.add ('meta')
+                card.appendChild(span);
 
             });
         } else {
@@ -78,12 +75,7 @@ function read_and_parse_indicators(url, base_link) {
         // Begin accessing JSON data here
         var data = JSON.parse(this.response);
 
-        console.log(data);
-        console.log(data['hydra:totalItems']);
-
         var items = data['hydra:member'];
-
-        console.log(items);
 
         if (request.status >= 200 && request.status < 400) {
             items.forEach(item => {
@@ -114,7 +106,10 @@ function read_and_parse_indicators(url, base_link) {
                 p.appendChild(a);
 
                 span = document.createElement('span');
-                span.textContent = 'id: ' + item.id + ' / @id: ' + item['@id'] + ' / @type: ' + item['@type'] + ' / name: ' + item.name  ;
+                Object.keys(item)
+                    .forEach(function eachKey(key) {
+                        span.textContent = span.textContent + ' / ' + key + ': ' + item[key];
+                    });
                 span.classList.add ('meta')
                 card.appendChild(span);
 
@@ -123,18 +118,11 @@ function read_and_parse_indicators(url, base_link) {
                 request_values.open('GET', 'https://api-cri-figs.tierx.dev/values?indicator.id='+item.id, true);
                 request_values.setRequestHeader("Content-Type", "application/json");
 
-console.log('https://api-cri-figs.tierx.dev/values?indicator.id='+item.id);
                 request_values.onload = function() {
 
                     // Begin accessing JSON data here
                      var data = JSON.parse(this.response);
-
-                    console.log(data);
-                    console.log(data['hydra:totalItems']);
-
                 var items = data['hydra:member'];
-
-                console.log(items);
 
                 if (request.status >= 200 && request.status < 400) {
 
@@ -223,14 +211,8 @@ function read_and_parse_values(url) {
 
         // Begin accessing JSON data here
         var data = JSON.parse(this.response);
-        console.log('data');
-
-        console.log(data);
-        console.log(data['hydra:totalItems']);
-
         var items = data['hydra:member'];
 
-        console.log(items);
 
         const card = document.createElement('div');
         card.setAttribute('class', 'card');
@@ -323,10 +305,6 @@ function read_and_parse_values(url) {
     }
 
     request.send();
-
-
-
-
 
 }
 
