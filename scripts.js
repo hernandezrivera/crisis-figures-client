@@ -1,4 +1,4 @@
-function read_and_parse(url, base_link) {
+function read_and_parse(url, base_link, id_attribute) {
     const app = document.getElementById('root');
 
     console.log(url);
@@ -29,16 +29,17 @@ function read_and_parse(url, base_link) {
                 const card = document.createElement('div');
                 card.setAttribute('class', 'card');
 
-                const h1 = document.createElement('h1');
-                h1.textContent = item.name;
+                const p = document.createElement('p');
+                p.textContent = item.name;
+                p.setAttribute('class', 'title');
 
                 container.appendChild(card);
                 var a = document.createElement('a');
-                a.href = base_link + item.id;
+                a.href = base_link + item[id_attribute];
 
                 card.appendChild(a);
 
-                a.appendChild(h1);
+                a.appendChild(p);
 
                 Object.keys(item)
                     .forEach(function eachKey(key) {
@@ -88,29 +89,36 @@ function read_and_parse_indicators(url, base_link) {
             items.forEach(item => {
                 const card = document.createElement('div');
                 card.setAttribute('class', 'card');
-
-                const h1 = document.createElement('h1');
-                h1.textContent = item.name;
-
                 container.appendChild(card);
+
                 var a = document.createElement('a');
                 a.href = base_link + item.id;
-                card.appendChild(a);
-                a.appendChild(h1);
                 var p = document.createElement('p');
+                p.textContent = item.name;
+                p.setAttribute('class', 'title');
+                card.appendChild(a);
+                a.appendChild(p);
+
+                p = document.createElement('p');
+                span = document.createElement('span');
+                span.textContent = 'Source: ' + item.organization;
+                p.appendChild(span);
                 card.appendChild(p);
 
-                Object.keys(item)
-                    .forEach(function eachKey(key) {
-                        span = document.createElement('span');
-                        span.textContent = key + ': ' + item[key];
-                        p.appendChild(span);
-                    });
+                span = document.createElement('span');
+                span.textContent = 'Country: ' + item.country;
+                var iso3 =  item.country.substr(item.country.length - 3);
+                var a = document.createElement('a');
+                a.href =  './country.html?code=' + iso3;
+                a.appendChild(span);
+                p.appendChild(a);
 
-
+                span = document.createElement('span');
+                span.textContent = 'id: ' + item.id + ' / @id: ' + item['@id'] + ' / @type: ' + item['@type'] + ' / name: ' + item.name  ;
+                span.classList.add ('meta')
+                card.appendChild(span);
 
                 // now we call to get all the values for that indicator
-
                 var request_values = new XMLHttpRequest();
                 request_values.open('GET', 'https://api-cri-figs.tierx.dev/values?indicator.id='+item.id, true);
                 request_values.setRequestHeader("Content-Type", "application/json");
@@ -156,8 +164,8 @@ console.log('https://api-cri-figs.tierx.dev/values?indicator.id='+item.id);
                           labels: dates,
                           datasets: [{
                               label: 'My First dataset',
-                              backgroundColor: '#055372',
-                              borderColor: 'rgb(255, 99, 132)',
+                              backgroundColor: '#5b92e5',
+                              borderColor: '#04415a',
                               data: values
                           }]
                       },
@@ -283,21 +291,31 @@ function read_and_parse_values(url) {
           labels: dates,
           datasets: [{
               label: 'My First dataset',
-              backgroundColor: '#055372',
-              borderColor: 'rgb(255, 99, 132)',
+              backgroundColor: '#5b92e5',
+              borderColor: '#04415a',
               data: values
           }]
       },
 
       // Configuration options go here
-      options: {
-           borderDash:  [{
-              lineTension: 0,
-              showLine: false
-           }],
-           steppedLine: false
-      }
-  });
+                      options: {
+                           borderDash:  [{
+                              lineTension: 0,
+                              showLine: false
+                           }],
+                           steppedLine: false,
+                            legend: {
+                                display: false
+                            },
+                            layout: {
+                                padding: {
+                                    left: 0,
+                                    right: 0,
+                                    top: 0,
+                                    bottom: 0
+                                }
+                             }
+                      }  });
 
         chart.canvas.parentNode.style.height = '500px';
         chart.canvas.parentNode.style.width = '1000px';

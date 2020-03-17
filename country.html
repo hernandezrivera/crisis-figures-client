@@ -26,7 +26,7 @@
     return vars;
 }
 
-var id = getUrlVars()["id"];
+var id = getUrlVars()["code"];
 console.log(id);
 
 </script>
@@ -40,10 +40,14 @@ console.log(id);
 
                 <h1>ReliefWeb Crisis Figures - Country page</h1>
 
+        <h2><a href="./countries.html">List of countries</a></h2>
+    <h2><a href="./vocabularies.html">List of vocabularies</a></h2>
+
+
 
   </div>
 
-  <script>read_and_parse_indicators('https://api-cri-figs.tierx.dev/indicators?country=' + id, './indicator.html?id=')</script>
+  <script>read_and_parse_indicators('https://api-cri-figs.tierx.dev/indicators?country.code=' + id, './indicator.html?id=')</script>
 </body>
 
 </html>
