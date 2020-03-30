@@ -16,16 +16,21 @@
 
     <h1>ReliefWeb Crisis Figures - Client demo</h1>
 
-    <h2><a href="./countries.html">List of countries</a></h2>
-    <h2><a href="./vocabularies.html">List of vocabularies</a></h2>
+   <p id="header_links">
+        <a href="./countries.html">List of countries</a>
+        <a href="./vocabularies.html">List of vocabularies</a>
+    </p>  
 
+    <div class="header" id="header">
+    </div>
+    
     <div class="container" id="container">
     </div>
     
   </div>
 
   <script>
-      get_plot_vocabularies('/vocabularies');
+      get_plot_vocabularies('/vocabularies', null);
     </script>
 </body>
 

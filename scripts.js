@@ -23,12 +23,15 @@ function get_plot_country_flag (iso3, element){
     request.send();
 }
 
-function get_plot_countries (endpoint){
+function get_plot_countries (endpoint, iso3){
 
     var countries = [];
     var country;
+    
     var url = base_figures_url + endpoint;
-
+    if (iso3 !== null)
+        url += '/' + iso3;
+console.log(url);
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.setRequestHeader("Content-Type", "application/json");
@@ -37,11 +40,13 @@ function get_plot_countries (endpoint){
 
         // Begin accessing JSON data here
         var data = JSON.parse(this.response);
-        var items = data['hydra:member'];
+        if (iso3 !== null)  items = [ data ];
+        else  items = data['hydra:member'];
 
         if (request.status >= 200 && request.status < 400) {
-            items.forEach(item => {
+             console.log(items);
 
+            items.forEach(item => {
                 country = {};
 
                 country.type = 'country';
@@ -55,7 +60,10 @@ function get_plot_countries (endpoint){
                     });
                 countries.push(country);
 
-                plot_card(country);
+                if (iso3 === null)
+                    plot_card(country);
+                else
+                    plot_title(country);
             });
         } else {
             console.error ('Unable to get list of countries');
@@ -66,15 +74,15 @@ function get_plot_countries (endpoint){
     return countries;
 }
 
-function get_plot_indicators (endpoint, iso3 , term){
+function get_plot_indicators (endpoint, iso3 , term, indicator_id){
 
     var indicators = [];
     var indicator;
-    if (term === null)
-        var url = base_figures_url + endpoint + '?country.code=' + iso3 + '&with[]=terms';
-    if (iso3 === null)
-        var url = base_figures_url + endpoint + '?terms.name=' + term + '&with[]=terms';
-
+    var url;
+    if (term === null) url = base_figures_url + endpoint + '?country.code=' + iso3 + '&with[]=terms';
+    if (iso3 === null) url = base_figures_url + endpoint + '?terms.name=' + term + '&with[]=terms';
+    if (indicator_id !== null) url = base_figures_url + endpoint + '/' + indicator_id + '&with[]=terms';
+        
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.setRequestHeader("Content-Type", "application/json");
@@ -83,8 +91,11 @@ function get_plot_indicators (endpoint, iso3 , term){
 
         // Begin accessing JSON data here
         var data = JSON.parse(this.response);
-        var items = data['hydra:member'];
-
+        if (indicator_id === null)
+            var items = data['hydra:member'];
+        else
+            var items = [data];
+console.log(items);
         if (request.status >= 200 && request.status < 400) {
             items.forEach(item => {
 
@@ -99,6 +110,7 @@ function get_plot_indicators (endpoint, iso3 , term){
                 indicator.organization = item.organization;
                 indicator.link = './indicator.html?id=' + item.id;
                 indicator.terms = item.terms;
+            //    indicator.terms = indicator.terms.map(term => term.label);
                 indicator.meta =  '';
                 Object.keys(item)
                     .forEach(function eachKey(key) {
@@ -107,7 +119,10 @@ function get_plot_indicators (endpoint, iso3 , term){
 
                 indicators.push(indicator);
 
-                plot_card_indicator(indicator);
+                if (indicator_id !== null)
+                    plot_title (indicator);
+                else
+                    plot_card_indicator(indicator);
             });
         } else {
             console.error ('Unable to get list of indicators');
@@ -293,11 +308,27 @@ function plot_card_indicator(indicator){
     span.innerHTML = 'Country: <a href="' + indicator.country.link+ '">' + indicator.country.iso3;
     p.appendChild(span);
     
+    span_terms = document.createElement('span');
+    span_terms.setAttribute('id', 'terms');
+
     indicator.terms.forEach(term => {    
-        span = document.createElement('span');
-        span.innerHTML = 'Term: <a href="./term.html?name=' + term.name+ '">' + term.label;
-        p.appendChild(span);
+        var span = document.getElementById('term-'+term.name);
+        if (span ===null)
+        {
+            span = document.createElement('span');
+            span.innerHTML = '<a href="./term.html?name=' + term.name+ '">' + term.label;
+            span.setAttribute('id', 'term-'+term.name);
+            span.setAttribute('class', 'tag');
+            span.style.backgroundColor = randomColor();
+            span_terms.appendChild(span);
+        } else {
+            var span2 = span.cloneNode(true);
+            span_terms.appendChild(span2);
+        }
+        
     });
+    card.appendChild(span_terms);
+
 
     span = document.createElement('span');
     span.textContent = indicator.meta;
@@ -307,52 +338,13 @@ function plot_card_indicator(indicator){
     get_plot_values('/values', indicator,card);     
 }
 
-
-function plot_card_indicator_ORIG(indicator){
-
-    const container = document.getElementById('container');
-
-    const card = document.createElement('div');
-    card.setAttribute('class', 'card');
-    container.appendChild(card);
-
-    var a = document.createElement('a');
-    a.href = indicator.link;
-    card.appendChild(a);
-
-    var p = document.createElement('p');
-    p.textContent = indicator.name;
-    p.setAttribute('class', 'title');
-    a.appendChild(p);
-
-    p = document.createElement('p');
-    var span = document.createElement('span');
-    span.textContent = 'Source: ' + indicator.organization;
-    p.appendChild(span);
-    card.appendChild(p);
-
-    span = document.createElement('span');
-    span.textContent = 'Country: ' + indicator.country;
-    a = document.createElement('a');
-    a.href =  indicator.country.link;
-    a.appendChild(span);
-    p.appendChild(a);
-
-    span = document.createElement('span');
-    span.textContent = indicator.meta;
-    span.classList.add ('meta');
-    card.appendChild(span);
-
-    get_plot_values('/values', indicator,card);
-}
-
-
-function get_plot_vocabularies (endpoint){
+function get_plot_vocabularies (endpoint, id){
 
     var vocabularies = [];
     var vocabulary;
     var url = base_figures_url + endpoint;
-
+    if (id !== null) url += '/' + id;
+    
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.setRequestHeader("Content-Type", "application/json");
@@ -361,16 +353,17 @@ function get_plot_vocabularies (endpoint){
 
         // Begin accessing JSON data here
         var data = JSON.parse(this.response);
-        var items = data['hydra:member'];
-
+        if (id !== null) var items = [data];
+        else var items = data['hydra:member'];
+console.log(items);
         if (request.status >= 200 && request.status < 400) {
             items.forEach(item => {
 
                 vocabulary = {};
-
+                vocabulary.id = item.id;
                 vocabulary.name = item.label;
                 vocabulary.internal_name = item.name;
-                vocabulary.link = './terms.html?vocabulary.name=' + vocabulary.internal_name;
+                vocabulary.link = './terms.html?vocabulary.name=' + vocabulary.internal_name + '&vocabulary.id=' + vocabulary.id  ;
                 vocabulary.meta =  '';
                 Object.keys(item)
                     .forEach(function eachKey(key) {
@@ -378,7 +371,8 @@ function get_plot_vocabularies (endpoint){
                     });
                 vocabularies.push(vocabulary);
 
-                plot_card(vocabulary);
+                if (id !== null) plot_title(vocabulary);
+                else plot_card(vocabulary);
             });
         } else {
             console.error ('Unable to get list of vocabularies');
@@ -389,11 +383,14 @@ function get_plot_vocabularies (endpoint){
     return vocabularies;
 }
 
-function get_plot_terms (endpoint, vocabulary_name){
+function get_plot_terms (endpoint, vocabulary_name, term_id){
 
     var terms = [];
     var term;
-    var url = base_figures_url + endpoint + '?vocabulary.name=' + vocabulary_name;
+    var url;
+    if (term_id === null ) url = base_figures_url + endpoint + '?vocabulary.name=' + vocabulary_name;
+    else url = base_figures_url + endpoint + '/' + term_id;
+
 
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
@@ -403,16 +400,18 @@ function get_plot_terms (endpoint, vocabulary_name){
 
         // Begin accessing JSON data here
         var data = JSON.parse(this.response);
-        var items = data['hydra:member'];
+        var items;
+        if (term_id ===null) items = data['hydra:member'];
+        else items = [data];
 
         if (request.status >= 200 && request.status < 400) {
             items.forEach(item => {
 
                 term = {};
-
+                term.id = item.id;
                 term.name = item.label;
                 term.internal_name = item.name;
-                term.link = './term.html?name=' + term.internal_name;
+                term.link = './term.html?name=' + term.internal_name + '&id=' + term.id;
                 term.meta =  '';
                 Object.keys(item)
                     .forEach(function eachKey(key) {
@@ -420,7 +419,8 @@ function get_plot_terms (endpoint, vocabulary_name){
                     });
                 terms.push(term);
 
-                plot_card(term);
+                if (term_id ===null) plot_card(term);
+                else plot_title (term);
             });
         } else {
             console.error ('Unable to get list of terms');
@@ -512,7 +512,30 @@ function plot_card(object){
     var span = document.createElement('span');
     span.textContent = object.meta;
     span.classList.add ('meta');
-    card.appendChild(span);
-    
+    card.appendChild(span);   
+}
 
+function plot_title(object){
+    const container = document.getElementById('header');
+
+    const h2 = document.createElement('h2');
+
+    container.appendChild(h2);
+
+    const p = document.createElement('p');
+    h2.appendChild(p);
+
+    if (object.type === 'country')
+       get_plot_country_flag(object.iso3, p);
+
+    p.textContent = object.name;
+    p.setAttribute('class', 'title');
+    
+    /*
+    var span = document.createElement('span');
+    span.textContent = object.meta;
+    span.classList.add ('meta');
+    h2.appendChild(span);   
+     */ 
+   
 }

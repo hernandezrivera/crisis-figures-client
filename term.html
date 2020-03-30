@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel='icon' href='chart-icon.png' type='image/x-icon'/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.5.4/randomColor.min.js"></script>
   <title>ReliefWeb Crisis Figures - Country page</title>
   <link href="style.css" rel="stylesheet">
   <script type="text/javascript" src='scripts.js'> </script>
@@ -21,8 +22,8 @@
     return vars;
     }
 
-    var id = getUrlVars()["name"];
-    console.log(id);
+    var name = getUrlVars()["name"];
+    var id = getUrlVars()["id"];
 
 </script>
 </head>
@@ -31,15 +32,19 @@
   <div id="root">
 
     <h1>ReliefWeb Crisis Figures - Vocabulary and themes page</h1>
-    <h2><a href="./countries.html">List of countries</a></h2>
-    <h2><a href="./vocabularies.html">List of vocabularies</a></h2>
-
+   <p id="header_links">
+        <a href="./countries.html">List of countries</a>
+        <a href="./vocabularies.html">List of vocabularies</a>
+    </p>  
+    <div class="header" id="header">
+    </div>
     <div class="container" id="container">
     </div>
   </div>
 
   <script>
-  get_plot_indicators ('/indicators', null, id );
+  get_plot_terms('/terms', null, id);     
+  get_plot_indicators ('/indicators', null, name, null );
   </script>
 </body>
 

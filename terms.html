@@ -21,8 +21,8 @@
     return vars;
     }
 
-    var id = getUrlVars()["vocabulary.name"];
-    console.log(id);
+    var name = getUrlVars()["vocabulary.name"];
+    var id = getUrlVars()["vocabulary.id"];
 
 </script>
 
@@ -34,8 +34,13 @@
 
     <h1>ReliefWeb Crisis Figures - Vocabularies page</h1>
 
-    <h2><a href="./countries.html">List of countries</a></h2>
-    <h2><a href="./vocabularies.html">List of vocabularies</a></h2>
+    <p id="header_links">
+        <a href="./countries.html">List of countries</a>
+        <a href="./vocabularies.html">List of vocabularies</a>
+    </p>
+    
+    <div class="header" id="header">
+    </div>
 
     <div class="container" id="container">
     </div>
@@ -43,7 +48,8 @@
   </div>
 
   <script>
-      get_plot_terms('/terms', id);
+      get_plot_vocabularies('/vocabularies', id);
+      get_plot_terms('/terms', name, null);
   </script>
 </body>
 

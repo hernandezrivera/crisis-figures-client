@@ -32,13 +32,17 @@ console.log(id);
   
     <h1>ReliefWeb Crisis Figures - Indicator page</h1>
 
-    <h2><a href="./countries.html">List of countries</a></h2>
-    <h2><a href="./vocabularies.html">List of vocabularies</a></h2>
-
+   <p id="header_links">
+        <a href="./countries.html">List of countries</a>
+        <a href="./vocabularies.html">List of vocabularies</a>
+    </p>  
+    <div class="header" id="header">
+    </div>
     <div class="container" id="container">
     </div>
     
   <script>  
+    get_plot_indicators ('/indicators', null, null, id );
     get_plot_values ('/values', id, null, true);
   </script>
 
