@@ -1,5 +1,7 @@
-const base_figures_url = 'https://api-cri-figs.tierx.dev';
+const base_figures_url = 'https://rw-crisisfigures-api.innovation.ahconu.org';
 const base_country_url = 'https://restcountries.eu/rest/v2/alpha';
+const username = 'demouser@ahconu.org';
+const password = 'demopa$$'
 
 function get_plot_country_flag (iso3, element){
 
@@ -34,6 +36,8 @@ function get_plot_countries (endpoint, iso3){
 console.log(url);
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
+    request.withCredentials = true;
+    request.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + password ));
     request.setRequestHeader("Content-Type", "application/json");
 
     request.onload = function() {
@@ -85,6 +89,8 @@ function get_plot_indicators (endpoint, iso3 , term, indicator_id){
         
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
+    request.withCredentials = true;
+    request.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + password ));
     request.setRequestHeader("Content-Type", "application/json");
 
     request.onload = function() {
@@ -141,6 +147,8 @@ function get_plot_values(endpoint, indicator_id, card, include_table){
     
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
+    request.withCredentials = true;
+    request.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + password ));
     request.setRequestHeader("Content-Type", "application/json");
 
     request.onload = function() {
@@ -347,6 +355,8 @@ function get_plot_vocabularies (endpoint, id){
     
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
+    request.withCredentials = true;
+    request.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + password ));
     request.setRequestHeader("Content-Type", "application/json");
 
     request.onload = function() {
@@ -355,7 +365,6 @@ function get_plot_vocabularies (endpoint, id){
         var data = JSON.parse(this.response);
         if (id !== null) var items = [data];
         else var items = data['hydra:member'];
-console.log(items);
         if (request.status >= 200 && request.status < 400) {
             items.forEach(item => {
 
@@ -388,12 +397,14 @@ function get_plot_terms (endpoint, vocabulary_name, term_id){
     var terms = [];
     var term;
     var url;
-    if (term_id === null ) url = base_figures_url + endpoint + '?vocabulary.name=' + vocabulary_name;
+    if (term_id === null ) url = base_figures_url + endpoint + '?vocabulary.name=' + vocabulary_name + '&with[]=parent';
     else url = base_figures_url + endpoint + '/' + term_id;
 
 
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
+    request.withCredentials = true;
+    request.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + password ));
     request.setRequestHeader("Content-Type", "application/json");
 
     request.onload = function() {
@@ -408,11 +419,13 @@ function get_plot_terms (endpoint, vocabulary_name, term_id){
             items.forEach(item => {
 
                 term = {};
+                term.type = 'term';
                 term.id = item.id;
                 term.name = item.label;
                 term.internal_name = item.name;
                 term.link = './term.html?name=' + term.internal_name + '&id=' + term.id;
                 term.meta =  '';
+                term.parent = item.parent;
                 Object.keys(item)
                     .forEach(function eachKey(key) {
                         term.meta = term.meta + ' / ' + key + ': ' + item[key];
@@ -441,6 +454,8 @@ function read_and_parse(url, base_link, id_attribute) {
 
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
+    request.withCredentials = true;
+    request.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + password ));
     request.setRequestHeader("Content-Type", "application/json");
 
     request.onload = function() {
@@ -513,6 +528,34 @@ function plot_card(object){
     span.textContent = object.meta;
     span.classList.add ('meta');
     card.appendChild(span);   
+    
+    if (object.type === 'term'){
+        span_terms = document.createElement('span');
+        span_terms.setAttribute('id', 'terms');
+
+        if (!(Array.isArray(object.parent))) {
+            term_parent = [object.parent];
+        } else
+            term_parent = object.parent;
+
+        term_parent.forEach(term_parent => {    
+            var span = document.getElementById('term-'+term_parent.name);
+            if (span ===null){
+                span = document.createElement('span');
+                span.innerHTML = '<a href="./term.html?name=' + term_parent.name+ '">' + term_parent.label;
+                span.setAttribute('id', 'term-'+term_parent.name);
+                span.setAttribute('class', 'tag');
+                span.style.backgroundColor = randomColor();
+                span_terms.appendChild(span);
+            } else {
+                var span2 = span.cloneNode(true);
+                span_terms.appendChild(span2);
+            }
+        });
+        
+        card.appendChild(span_terms);
+    }
+
 }
 
 function plot_title(object){
