@@ -155,9 +155,9 @@ float: left;
   border-radius: 0px;
   overflow: hidden;
   transition: all .2s linear;
-    display: flex;
+  display: flex;
   flex-wrap: wrap;
-  width:100%;
+  width:90%;
 
 }
 

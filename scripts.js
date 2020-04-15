@@ -33,7 +33,6 @@ function get_plot_countries (endpoint, iso3){
     var url = base_figures_url + endpoint;
     if (iso3 !== null)
         url += '/' + iso3;
-console.log(url);
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.withCredentials = true;
@@ -48,7 +47,6 @@ console.log(url);
         else  items = data['hydra:member'];
 
         if (request.status >= 200 && request.status < 400) {
-             console.log(items);
 
             items.forEach(item => {
                 country = {};
@@ -60,7 +58,7 @@ console.log(url);
                 country.meta =  '';
                 Object.keys(item)
                     .forEach(function eachKey(key) {
-                        country.meta = country.meta + ' / ' + key + ': ' + item[key];
+                        country.meta = country.meta + ' / ' + key + ': ' + JSON.stringify(item[key]);
                     });
                 countries.push(country);
 
@@ -101,7 +99,7 @@ function get_plot_indicators (endpoint, iso3 , term, indicator_id){
             var items = data['hydra:member'];
         else
             var items = [data];
-console.log(items);
+
         if (request.status >= 200 && request.status < 400) {
             items.forEach(item => {
 
@@ -120,7 +118,7 @@ console.log(items);
                 indicator.meta =  '';
                 Object.keys(item)
                     .forEach(function eachKey(key) {
-                        indicator.meta = indicator.meta + ' / ' + key + ': ' + item[key];
+                        indicator.meta = indicator.meta + ' / ' + key + ': ' + JSON.stringify(item[key]);
                     });
 
                 indicators.push(indicator);
@@ -168,10 +166,10 @@ function get_plot_values(endpoint, indicator_id, card, include_table){
              });
 
              items.sort((a, b) => (a.date > b.date) ? 1 : -1);
-
              indicator.values_array = items;
              var indicator_dates = items.map(a => a.date);
              var indicator_values = items.map(a => a.value);
+             
              indicator.dates = indicator_dates;
              indicator.values = indicator_values;
              plot_values(indicator, card, include_table);
@@ -205,8 +203,12 @@ function plot_values(indicator, card, include_table){
         new_card.setAttribute('class', 'chart');
         indicator_subcontainer.appendChild(new_card);
         new_card.appendChild(canvas);
-    } else
-        indicator_container.appendChild(canvas);
+    } else {
+        const new_card = document.createElement('div');
+        new_card.setAttribute('class', 'chart');
+        indicator_container.appendChild(new_card);
+        new_card.appendChild(canvas);
+    }
 
      //ploting the data
      var chart = new Chart(ctx, {
@@ -235,9 +237,9 @@ function plot_values(indicator, card, include_table){
             },
             layout: {
                 padding: {
-                    left: 0,
-                    right: 0,
-                    top: 0,
+                    left: 15,
+                    right: 15,
+                    top: 20,
                     bottom: 0
                 }
              }
@@ -343,7 +345,7 @@ function plot_card_indicator(indicator){
     span.classList.add ('meta');
     card.appendChild(span);
 
-    get_plot_values('/values', indicator,card);     
+    get_plot_values('/values', indicator.id,card);     
 }
 
 function get_plot_vocabularies (endpoint, id){
@@ -376,7 +378,7 @@ function get_plot_vocabularies (endpoint, id){
                 vocabulary.meta =  '';
                 Object.keys(item)
                     .forEach(function eachKey(key) {
-                        vocabulary.meta = vocabulary.meta + ' / ' + key + ': ' + item[key];
+                        vocabulary.meta = vocabulary.meta + ' / ' + key + ': ' + JSON.stringify(item[key]);
                     });
                 vocabularies.push(vocabulary);
 
@@ -428,7 +430,7 @@ function get_plot_terms (endpoint, vocabulary_name, term_id){
                 term.parent = item.parent;
                 Object.keys(item)
                     .forEach(function eachKey(key) {
-                        term.meta = term.meta + ' / ' + key + ': ' + item[key];
+                        term.meta = term.meta + ' / ' + key + ': ' + JSON.stringify(item[key]);
                     });
                 terms.push(term);
 
