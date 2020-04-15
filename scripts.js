@@ -2,6 +2,7 @@ const base_figures_url = 'https://rw-crisisfigures-api.innovation.ahconu.org';
 const base_country_url = 'https://restcountries.eu/rest/v2/alpha';
 const username = 'demouser@ahconu.org';
 const password = 'demopa$$'
+const debug = false;
 
 function get_plot_country_flag (iso3, element){
 
@@ -137,11 +138,16 @@ function get_plot_indicators (endpoint, iso3 , term, indicator_id){
     return indicators;
 }
 
-function get_plot_values(endpoint, indicator_id, card, include_table){
-    var url = base_figures_url + endpoint + '?indicator.id=' + indicator_id;
 
-    var indicator = {};
-    indicator.id = indicator_id;
+function get_plot_values(endpoint, indicator, card, include_table){
+    
+    if ( indicator.id == undefined){
+           id = indicator;
+           indicator = {};
+           indicator.id = id;
+    }
+        
+    var url = base_figures_url + endpoint + '?indicator.id=' + indicator.id;
     
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
@@ -209,7 +215,6 @@ function plot_values(indicator, card, include_table){
         indicator_container.appendChild(new_card);
         new_card.appendChild(canvas);
     }
-
      //ploting the data
      var chart = new Chart(ctx, {
       // The type of chart we want to create
@@ -219,9 +224,10 @@ function plot_values(indicator, card, include_table){
           labels: indicator.dates,
           datasets: [{
               label: indicator.name, // TODO: Name of the indicator
-              backgroundColor: '#5b92e5',
-              borderColor: '#04415a',
-              data: indicator.values
+              backgroundColor: '#ffffff',// '#5b92e5',
+              borderColor: '#5b92e5', // '#04415a',
+              borderWidth: 2,
+              data: indicator.values,
           }]
       },
 
@@ -242,8 +248,21 @@ function plot_values(indicator, card, include_table){
                     top: 20,
                     bottom: 0
                 }
-             }
-      }
+             },
+            scales: {
+                xAxes: [{
+                    ticks: {
+                      fontSize: 8
+                    }
+                }],
+                yAxes: [{
+                      ticks: {
+                        fontSize: 8,
+                        beginAtZero: true
+                      }
+                    }]
+            }
+        }
     });
     indicator.chart = chart;
     
@@ -339,13 +358,12 @@ function plot_card_indicator(indicator){
     });
     card.appendChild(span_terms);
 
-
     span = document.createElement('span');
-    span.textContent = indicator.meta;
+    if (debug) span.textContent = indicator.meta;
     span.classList.add ('meta');
     card.appendChild(span);
 
-    get_plot_values('/values', indicator.id,card);     
+    get_plot_values('/values', indicator,card);     
 }
 
 function get_plot_vocabularies (endpoint, id){
@@ -487,8 +505,9 @@ function read_and_parse(url, base_link, id_attribute) {
                 var span = document.createElement('span');
                 Object.keys(item)
                     .forEach(function eachKey(key) {
-                        span.textContent = span.textContent + ' / ' + key + ': ' + item[key];
+                        meta_text = meta_text + ' / ' + key + ': ' + item[key];
                     });
+                if (debug) span.textContent = meta_text;
                 span.classList.add ('meta')
                 card.appendChild(span);
 
@@ -527,20 +546,20 @@ function plot_card(object){
     a.appendChild(p);
 
     var span = document.createElement('span');
-    span.textContent = object.meta;
+    if (debug) span.textContent = object.meta;
     span.classList.add ('meta');
     card.appendChild(span);   
     
-    if (object.type === 'term'){
+    if ( (object.type === 'term' ) && (object.parent !== undefined ) ){
         span_terms = document.createElement('span');
         span_terms.setAttribute('id', 'terms');
 
-        if (!(Array.isArray(object.parent))) {
-            term_parent = [object.parent];
-        } else
-            term_parent = object.parent;
+        if (!Array.isArray(object.parent) )  
+            term_parents = [object.parent];
+        else
+            term_parents = object.parent;
 
-        term_parent.forEach(term_parent => {    
+        term_parents.forEach(term_parent => {    
             var span = document.getElementById('term-'+term_parent.name);
             if (span ===null){
                 span = document.createElement('span');
